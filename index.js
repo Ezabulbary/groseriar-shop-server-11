@@ -15,19 +15,55 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        const itemsCollection = client.db('inventory').collection('items');
-        
-    } finally {
+        const categoriesCollection = client.db('groseriarShop').collection('categories');
+        const itemsCollection = client.db('groseriarShop').collection('items');
+
+        console.log('Database connected')
+
+        // categories API
+        app.get('/categories', async (req, res) => {
+            const query = {};
+            const cursor = categoriesCollection.find(query);
+            const categories = await cursor.toArray();
+            res.send(categories)
+        });
+
+
+        // get items API
+        app.get('/items', async (req, res) => {
+            const query = {};
+            const cursor = itemsCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items)
+        });
+
+        app.get('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: id };
+            const item = await itemsCollection.findOne(query);
+            res.send(item);
+        });
+
+        // Delete items API
+        app.delete('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: id};
+            const result = await itemsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+    }
+    finally {
         // await client.close();
     }
 }
 run().catch(console.dir);
 
 
-app.get('/', (req, res) =>{
+app.get('/', (req, res) => {
     res.send('server side connected!!')
 });
 
-app.listen(port, () =>{
+app.listen(port, () => {
     console.log(`App listening on port ${port}`)
 })
