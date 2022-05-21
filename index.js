@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config()
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config();
 const port = process.env.PORT || 5000;
 
 
@@ -49,14 +49,39 @@ async function run() {
             const newItem = req.body;
             const result = await itemsCollection.insertOne(newItem);
             res.send(result);
-        })
+        });
 
-        // Delete items API
+        // Delete item API
         app.delete('/items/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: id};
+            const query = { _id: ObjectId(id)};
             const result = await itemsCollection.deleteOne(query);
             res.send(result);
+        });
+
+        // Update items API
+        app.put('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateItem = req.body;
+            const filter = {_id: id};
+            option = { upset: true };
+            const updateDoc = {
+                $set: {
+                    quantity: updateItem.number
+                }
+            };
+            const result = await itemsCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
+        // MyItems DB
+        app.get('/items', async (req, res) =>{
+            const email = req.query.email;
+            console.log(email)
+            const query = {email: email};
+            const cursor = itemsCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items)
         })
 
     }
