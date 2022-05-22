@@ -39,7 +39,7 @@ async function run() {
 
         app.get('/items/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: id };
+            const query = { _id: ObjectId(id) };
             const item = await itemsCollection.findOne(query);
             res.send(item);
         });
@@ -63,15 +63,16 @@ async function run() {
         app.put('/items/:id', async (req, res) => {
             const id = req.params.id;
             const updateItem = req.body;
-            const filter = {_id: id};
-            option = { upset: true };
+            const filter = {_id: ObjectId(id)};
+            const options = { upset: true };
             const updateDoc = {
                 $set: {
-                    quantity: updateItem.number
+                    quantity: updateItem.newQuantity
                 }
             };
             const result = await itemsCollection.updateOne(filter, updateDoc, options);
-            res.send(result);
+            const item = await itemsCollection.findOne(filter);
+            res.send({ result, item});
         });
 
         // MyItems DB
